@@ -1,0 +1,30 @@
+version: '3.5'
+services:
+  db:
+    restart: always
+    container_name: 'db'
+    image: postgres
+    ports:
+      - '5433:5432'
+    env_file:
+      - app/.env
+    networks:
+      - user_stat
+
+  fastapi:
+    build: .
+    depends_on:
+      - db
+    restart: always
+    ports:
+      - '8000:8000'
+    tty: true
+    volumes:
+      - .:/app
+    stdin_open: true
+    networks:
+      - user_stat
+
+networks:
+  user_stat:
+    name: user_stat

@@ -9,7 +9,8 @@ services:
     env_file:
       - app/.env
     networks:
-      - user_stat
+      user_stat:
+        ipv4_address: 172.20.0.3
 
   fastapi:
     build: .
@@ -23,8 +24,12 @@ services:
       - .:/app
     stdin_open: true
     networks:
-      - user_stat
+      user_stat:
+        ipv4_address: 172.20.0.2
 
 networks:
   user_stat:
     name: user_stat
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

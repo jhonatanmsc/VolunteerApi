@@ -38,4 +38,22 @@ async def create_user(user: User):
     )
     db.session.add(user_instance)
     db.session.commit()
-    return user_instance
+    return {'status': '201'}
+
+
+@app.get('/users')
+async def get_users():
+    return db.session.query(UserTable).offset(0).all()
+
+
+@app.get('/users/{user_id}')
+async def get_user(user_id: int):
+    return db.session.query(UserTable).filter(UserTable.id == user_id).first()
+
+
+@app.delete('/users/{user_id}')
+async def delete_user(user_id: int):
+    user_instance = db.session.query(UserTable).filter(UserTable.id == user_id).first()
+    db.session.delete(user_instance)
+    db.session.commit()
+    return {'status': '200'}

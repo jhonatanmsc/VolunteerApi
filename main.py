@@ -5,8 +5,8 @@ from fastapi import FastAPI
 from sqlalchemy.orm import sessionmaker
 
 from app.database import engine, pg
-from app.models import User
-from app.tables import UserTable
+from app.models import User, Action
+from app.tables import UserTable, ActionsTable
 
 app = FastAPI()
 app.add_middleware(DBSessionMiddleware, db_url=pg.postgres_db_path)
@@ -55,5 +55,39 @@ async def get_user(user_id: int):
 async def delete_user(user_id: int):
     user_instance = db.session.query(UserTable).filter(UserTable.id == user_id).first()
     db.session.delete(user_instance)
+    db.session.commit()
+    return {'status': '200'}
+
+
+@app.post('/actions')
+async def create_action(action: Action):
+    action_instance = ActionsTable(
+        name=action.name,
+        company=action.company,
+        street=action.street,
+        number=action.number,
+        district=action.district,
+        city=action.city,
+        description=action.description
+    )
+    db.session.add(action_instance)
+    db.session.commit()
+    return {'status': '201'}
+
+
+@app.get('/actions')
+async def get_actions():
+    return db.session.query(ActionsTable).offset(0).all()
+
+
+@app.get('/actions/{action_id}')
+async def get_action(action_id: int):
+    return db.session.query(ActionsTable).filter(ActionsTable.id == action_id).first()
+
+
+@app.delete('/actions/{action_id}')
+async def delete_action(action_id: int):
+    action_instance = db.session.query(ActionsTable).filter(ActionsTable.id == action_id).first()
+    db.session.delete(action_instance)
     db.session.commit()
     return {'status': '200'}

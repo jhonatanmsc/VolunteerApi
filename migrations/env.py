@@ -1,4 +1,3 @@
-import pdb
 import sys
 from logging.config import fileConfig
 
@@ -14,11 +13,12 @@ sys.path.append(Path(__file__).parent.parent)
 # access to the values within the .ini file in use.
 config = context.config
 
-from app.tables import metadata
-from app.settings import PostgresConfiguration
-pg = PostgresConfiguration()
+from core.tables import metadata
+from core.database import DATABASES
 
-config.set_main_option("sqlalchemy.url", pg.postgres_db_path)
+DEFAULT_DB = DATABASES['default']
+
+config.set_main_option("sqlalchemy.url", DEFAULT_DB)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
@@ -47,7 +47,7 @@ def run_migrations_offline():
     script output.
 
     """
-    url = pg.postgres_db_path
+    url = DEFAULT_DB
 
     context.configure(
         url=url,

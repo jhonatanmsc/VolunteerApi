@@ -12,9 +12,9 @@ para rodar o projeto vc precisará de docker e docker compose instalado em sua m
 
 comandos para iniciar:
 ```bash
-$ cp app/.env.example app/.env
-$ docker-compose build
-$ docker-compose up -d
+$ cp core/.env.example core/.env
+$ make startup
+$ make migrate
 ```
 
 e pronto se tudo tiver dado certo você poderá acessar a tela do swagger para testar os endpoints :D, para isso basta acessar localhost:8000/docs

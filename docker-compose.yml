@@ -1,35 +1,36 @@
 version: '3.5'
 services:
-  db:
+  postgres:
     restart: always
-    container_name: 'db'
+    container_name: 'postgres'
+    hostname: postgres
     image: postgres
     ports:
       - '5433:5432'
-    env_file:
-      - app/.env
-    networks:
-      user_stat:
-        ipv4_address: 172.20.0.3
+    environment:
+      - POSTGRES_USER=checkorders
+      - POSTGRES_PASSWORD=checkorders
+      - POSTGRES_DB=checkorders
 
-  fastapi:
+  checkorders:
     build: .
+    container_name: 'checkorders'
     depends_on:
-      - db
+      - postgres
     restart: always
     ports:
       - '8000:8000'
-    tty: true
     volumes:
-      - .:/app
+      - .:/code
     stdin_open: true
-    networks:
-      user_stat:
-        ipv4_address: 172.20.0.2
 
-networks:
-  user_stat:
-    name: user_stat
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres

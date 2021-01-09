@@ -1,6 +1,6 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
-COPY . .
+WORKDIR /code/
+COPY . /code/
 RUN pip install -r requirements.txt
 EXPOSE 8000
-CMD alembic upgrade head
-CMD uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+CMD uvicorn core:app --host 0.0.0.0 --port 8000 --reload

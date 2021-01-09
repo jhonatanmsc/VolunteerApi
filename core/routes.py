@@ -6,7 +6,10 @@ from core.settings import *
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {
+        "documentation": "http://localhost:8000/docs",
+        "users": "http://localhost:8000/users"
+    }
 
 
 @app.post('/users')

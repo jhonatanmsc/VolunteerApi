@@ -1,6 +1,10 @@
+import pdb
+
+from cryptography.fernet import Fernet
 from sqlalchemy.orm import Session
 
-from core.serializers.user import User, UpdateUser
+from core.serializers.user import User, UpdateUser, AuthUser, UserCredentials
+from core.settings import SECRET_KEY
 from core.tables import UserTable
 
 
@@ -16,8 +20,8 @@ def delete_object(model: any, session: Session, id: int):
     user_instance = get_object(model, session, id)
     if user_instance is None:
         return None
-    session.session.delete(user_instance)
-    session.session.commit()
+    session.delete(user_instance)
+    session.commit()
     return user_instance
 
 
@@ -32,6 +36,35 @@ def create_user(session: Session, user: User):
     session.commit()
     session.refresh(instance)
     return instance
+
+
+def register_authuser(session: Session, user: User):
+    password = Fernet(SECRET_KEY).encrypt(user.password.encode())
+    instance = UserTable(
+        name=user.name,
+        password=password.decode(),
+        email=user.email,
+        district=user.district,
+        city=user.city
+    )
+    session.add(instance)
+    session.commit()
+    session.refresh(instance)
+    return instance
+
+
+def login_user(session: Session, credentials: UserCredentials):
+    user = get_user_by_email(session, credentials.email)
+    decrypted_password = Fernet(SECRET_KEY).decrypt(user.password.encode())
+    return decrypted_password.decode() == credentials.password
+
+
+def set_password(session: Session, id: int, password: str):
+    user = get_object(UserTable, session, id)
+    user.password = password
+    session.add(user)
+    session.commit()
+    session.refresh(user)
 
 
 def update_user(session: Session, user_id: int, user: UpdateUser):

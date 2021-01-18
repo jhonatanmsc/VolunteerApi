@@ -1,5 +1,9 @@
+from datetime import datetime, timedelta
+
+import jwt
+
 from core.db_helper import *
-from core.serializers.user import User
+from core.serializers.user import User, UserCredentials
 from core.tables.users import UserTable
 from core.settings import *
 
@@ -47,3 +51,25 @@ async def delete_user(user_id: int):
     if instance is None:
         return {'status': '404'}
     return {'status': '204'}
+
+
+@app.post('/register')
+async def register(user: AuthUser):
+    if user.password != user.password2:
+        return {'detail': 'As senhas não são iguais.'}
+    register_authuser(db.session, user)
+    return {'detail': f'Usuário {user.name} registrado.'}
+
+
+@app.post('/login')
+async def login(credentials: UserCredentials):
+    logged = login_user(db.session, credentials)
+    user = get_user_by_email(db.session, credentials.email)
+    if not logged:
+        return {'detail': 'Credenciais inválidas.'}
+    data = {
+        'user_id': user.id,
+        'user_email': user.email,
+        'exp': datetime.utcnow() + timedelta(days=JWT_CONFIG['exp_days'])
+    }
+    return {'token': jwt.encode(data, SECRET_KEY, algorithm='HS256')}
